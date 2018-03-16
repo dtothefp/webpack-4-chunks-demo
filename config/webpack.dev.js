@@ -3,7 +3,7 @@ const path = require('path')
 const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
-const {NODE_ENV} = process.env;
+const { NODE_ENV } = process.env
 
 const config = {
   entry: ['babel-polyfill', './src/index.js'],
