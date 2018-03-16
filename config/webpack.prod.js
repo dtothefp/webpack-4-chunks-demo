@@ -2,14 +2,14 @@ const autoprefixer = require('autoprefixer')
 const cssnano = require('cssnano')
 const path = require('path')
 const webpack = require('webpack')
-
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-const extractSass = new ExtractTextPlugin({
+const extractSass = new MiniCssExtractPlugin({
   filename: '[name].css',
 })
+
+const {NODE_ENV} = process.env;
 
 const config = {
   bail: true,
@@ -19,6 +19,13 @@ const config = {
     filename: '[name].js',
     chunkFilename: '[name].[chunkhash].js',
   },
+  mode: NODE_ENV,
+  optimization: {
+    minimize: true,
+  },
+  performance: {
+    hints: false,
+  },
   resolve: {
     extensions: ['.jsx', '.js'],
   },
@@ -26,6 +33,7 @@ const config = {
     rules: [{
       test: /\.js$/,
       loader: 'babel-loader',
+      exclude: /node_modules/,
       options: {
         babelrc: false,
         presets: ['env', 'react'],
@@ -37,22 +45,19 @@ const config = {
       },
     }, {
       test: /\.s?css$/,
-      use: extractSass.extract({
-        use: [{
-          loader: 'css-loader',
-        }, {
+      loaders: [
+        MiniCssExtractPlugin.loader,
+        'css-loader',
+        {
           loader: 'postcss-loader',
           options: {
             plugins: () => [
               autoprefixer(),
-              cssnano(),
             ],
           },
-        }, {
-          loader: 'sass-loader',
-        }],
-        fallback: 'style-loader',
-      }),
+        },
+        'sass-loader',
+      ],
     }, {
       test: /\.(eot|svg|ttf|woff|woff2)$/,
       loader: 'file-loader',
@@ -80,14 +85,10 @@ const config = {
         minifyURLs: true,
       },
     }),
-    new UglifyJsPlugin({
-      parallel: true,
-      cache: true,
-    }),
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify('production'),
+      'process.env.NODE_ENV': JSON.stringify(NODE_ENV),
     }),
-    extractSass,
+    extractSass
   ],
 }
 

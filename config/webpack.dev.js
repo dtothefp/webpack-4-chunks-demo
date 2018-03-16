@@ -1,8 +1,9 @@
 const autoprefixer = require('autoprefixer')
 const path = require('path')
 const webpack = require('webpack')
-
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+
+const {NODE_ENV} = process.env;
 
 const config = {
   entry: ['babel-polyfill', './src/index.js'],
@@ -12,6 +13,13 @@ const config = {
     filename: '[name].js',
     chunkFilename: '[name].[chunkhash].js',
   },
+  mode: NODE_ENV,
+  optimization: {
+    minimize: false,
+  },
+  performance: {
+    hints: false,
+  },
   resolve: {
     extensions: ['.jsx', '.js'],
   },
@@ -19,6 +27,7 @@ const config = {
     rules: [{
       test: /\.js$/,
       loader: 'babel-loader',
+      exclude: /node_modules/,
       options: {
         babelrc: false,
         presets: ['env', 'react'],
@@ -60,9 +69,7 @@ const config = {
     new HtmlWebpackPlugin({
       template: 'public/index.html',
     }),
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify('development'),
-    }),
+    new webpack.EnvironmentPlugin(['NODE_ENV']),
     new webpack.NamedModulesPlugin(),
     new webpack.HotModuleReplacementPlugin(),
   ],
